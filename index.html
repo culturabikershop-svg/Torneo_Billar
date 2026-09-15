@@ -1,0 +1,2517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Torneo de Billar a 3 Bandas</title>
+    <!-- Librería para captura de pantalla directa y nítida en imagen PNG -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #334155;
+            --accent: #22c55e;
+            --accent-hover: #16a34a;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --border: #475569;
+            --badge: #38bdf8;
+            --gold: #d97706;
+            --whatsapp: #25d366;
+            --whatsapp-hover: #1da851;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-light);
+            padding: 1.5rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 1.2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            color: #38bdf8;
+            margin-bottom: 0.5rem;
+        }
+
+        /* BARRA DE RESPALDOS */
+        .backup-bar {
+            display: flex;
+            justify-content: center;
+            gap: 0.6rem;
+            margin-bottom: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-backup {
+            background-color: #334155;
+            color: #f8fafc;
+            border: 1px solid var(--border);
+            padding: 0.45rem 0.9rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .btn-backup:hover {
+            background-color: #475569;
+            border-color: #38bdf8;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background-color: var(--bg-card);
+            color: var(--text-light);
+            border: 1px solid var(--border);
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .tab-btn.active {
+            background-color: var(--accent);
+            color: #022c22;
+            border-color: var(--accent);
+        }
+
+        .panel {
+            display: none;
+            max-width: 1250px;
+            margin: 0 auto;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #facc15;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        input, textarea, select {
+            background-color: var(--bg-input);
+            color: var(--text-light);
+            border: 1px solid var(--border);
+            padding: 0.6rem;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        /* Quitar flechas nativas para maximizar lectura numérica */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: 2px solid var(--accent);
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            resize: vertical;
+        }
+
+        button.btn {
+            background-color: var(--accent);
+            color: #022c22;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button.btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        button.btn-whatsapp {
+            background-color: var(--whatsapp);
+            color: #022c22;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+        }
+
+        button.btn-whatsapp:hover {
+            background-color: var(--whatsapp-hover);
+            color: #ffffff;
+        }
+
+        button.btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        button.btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        button.btn-gold {
+            background-color: var(--gold);
+            color: white;
+        }
+
+        button.btn-gold:hover {
+            background-color: #b45309;
+        }
+
+        button.btn-silver {
+            background-color: #64748b;
+            color: white;
+        }
+
+        button.btn-silver:hover {
+            background-color: #475569;
+        }
+
+        button.btn-bronze {
+            background-color: #a16207;
+            color: white;
+        }
+
+        button.btn-bronze:hover {
+            background-color: #854d0e;
+        }
+
+        button.btn-wo {
+            background-color: #475569;
+            color: #f8fafc;
+            border: 1px solid #64748b;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        button.btn-wo:hover {
+            background-color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .player-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .player-item {
+            background-color: var(--bg-input);
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+            gap: 0.5rem;
+        }
+
+        .badge-dist {
+            background-color: #0f172a;
+            color: var(--badge);
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 0.6rem 0.8rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: #0f172a;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        tr:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .text-center { text-align: center; }
+
+        .groups-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .match-row {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #facc15;
+        }
+
+        /* GRID AMPLIADO CON BOTONES W.O. EN MESAS Y PARTIDAS */
+        .match-inputs {
+            display: grid;
+            grid-template-columns: minmax(110px, 1fr) auto auto auto minmax(110px, 1fr);
+            align-items: center;
+            gap: 0.6rem;
+            text-align: center;
+        }
+
+        .player-match-side {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-light);
+            overflow: hidden;
+        }
+
+        .player-match-side.side-left {
+            justify-content: flex-start;
+        }
+
+        .player-match-side.side-right {
+            justify-content: flex-end;
+        }
+
+        .player-match-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .player-match-side.loser-wo .player-match-name {
+            text-decoration: line-through;
+            color: var(--danger);
+            opacity: 0.75;
+        }
+
+        .input-car {
+            width: 78px !important;
+            min-width: 75px !important;
+            padding: 0.45rem 0.2rem !important;
+            font-size: 1.15rem !important;
+            font-weight: bold !important;
+            text-align: center !important;
+            background-color: #1e293b !important;
+            border: 1.5px solid var(--border) !important;
+            color: #facc15 !important;
+        }
+
+        .input-inn {
+            width: 72px !important;
+            min-width: 68px !important;
+            padding: 0.45rem 0.2rem !important;
+            font-size: 1.1rem !important;
+            font-weight: bold !important;
+            text-align: center !important;
+            background-color: #0f172a !important;
+            border: 1.5px dashed var(--badge) !important;
+            color: #38bdf8 !important;
+        }
+
+        .match-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* BRACKET */
+        .bracket-container {
+            display: flex;
+            gap: 1.5rem;
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
+
+        .bracket-round {
+            min-width: 310px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+        }
+
+        .bracket-match {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.8rem;
+            margin: 0.8rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.25);
+        }
+
+        .bracket-schedule {
+            display: flex;
+            gap: 0.4rem;
+            margin-bottom: 0.6rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .bracket-schedule input {
+            font-size: 0.75rem;
+            padding: 3px 5px;
+            background-color: #0f172a;
+            border: 1px solid var(--border);
+        }
+
+        .bracket-team {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.35rem 0;
+            gap: 0.4rem;
+        }
+
+        .input-ko-score {
+            width: 70px !important;
+            min-width: 65px !important;
+            padding: 0.35rem 0.2rem !important;
+            font-size: 1.15rem !important;
+            font-weight: bold !important;
+            text-align: center !important;
+            background-color: #0f172a !important;
+            color: #facc15 !important;
+            border: 1.5px solid var(--border) !important;
+        }
+
+        .bracket-team.winner {
+            font-weight: bold;
+            color: #facc15;
+        }
+
+        .bracket-team.loser-wo {
+            text-decoration: line-through;
+            color: var(--danger);
+            opacity: 0.75;
+        }
+
+        /* PIZARRA COMPACTA */
+        .simple-board-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            gap: 0.8rem;
+        }
+
+        .simple-board-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-top: 4px solid #38bdf8;
+            border-radius: 6px;
+            padding: 0.75rem 0.9rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        .simple-board-card h3 {
+            font-size: 1.05rem;
+            color: #facc15;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.3rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            letter-spacing: 0.03em;
+        }
+
+        .simple-board-card ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .simple-board-card li {
+            font-size: 0.88rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 3px 0;
+            border-bottom: 1px dashed rgba(255,255,255,0.04);
+        }
+
+        .simple-board-card li:last-child {
+            border-bottom: none;
+        }
+
+        /* DIPLOMAS */
+        .diploma-wrapper {
+            background-color: #fff;
+            color: #1a1a1a;
+            width: 100%;
+            max-width: 960px;
+            margin: 1.5rem auto;
+            padding: 20px;
+            border: 8px double #b45309;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            text-align: center;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .diploma-inner {
+            position: relative;
+            border: 2px solid #d97706;
+            padding: 40px 35px 30px 35px;
+            background: radial-gradient(circle at center, #ffffff 60%, #fffbeb 100%);
+        }
+
+        .diploma-logo-corner {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+            filter: drop-shadow(0 3px 5px rgba(0,0,0,0.2));
+        }
+
+        .diploma-title {
+            font-family: Georgia, serif;
+            font-size: 2.2rem;
+            letter-spacing: 2px;
+            color: #78350f;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .diploma-subtitle {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: #92400e;
+            margin-bottom: 22px;
+            font-weight: bold;
+        }
+
+        .diploma-award {
+            font-size: 1.1rem;
+            font-style: italic;
+            color: #4b5563;
+            margin-bottom: 12px;
+        }
+
+        .diploma-name {
+            font-family: Georgia, serif;
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #1e3a8a;
+            border-bottom: 2px solid #d97706;
+            display: inline-block;
+            padding: 0 40px 5px;
+            margin-bottom: 18px;
+        }
+
+        .diploma-desc {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            max-width: 720px;
+            margin: 0 auto 25px;
+            color: #374151;
+        }
+
+        .diploma-signatures {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 35px;
+            padding: 0 20px;
+        }
+
+        .signature-box {
+            border-top: 1.5px solid #6b7280;
+            width: 220px;
+            padding-top: 6px;
+            font-size: 0.85rem;
+            color: #4b5563;
+        }
+
+        .diploma-wrapper.plata { border-color: #64748b; }
+        .diploma-wrapper.plata .diploma-inner { border-color: #94a3b8; background: radial-gradient(circle at center, #ffffff 60%, #f1f5f9 100%); }
+        .diploma-wrapper.plata .diploma-title { color: #334155; }
+        .diploma-wrapper.plata .diploma-subtitle { color: #475569; }
+        .diploma-wrapper.plata .diploma-name { color: #0f172a; border-bottom-color: #64748b; }
+
+        .diploma-wrapper.bronce { border-color: #a16207; }
+        .diploma-wrapper.bronce .diploma-inner { border-color: #d97706; background: radial-gradient(circle at center, #ffffff 60%, #fefce8 100%); }
+        .diploma-wrapper.bronce .diploma-title { color: #713f12; }
+        .diploma-wrapper.bronce .diploma-subtitle { color: #854d0e; }
+        .diploma-wrapper.bronce .diploma-name { color: #451a03; border-bottom-color: #a16207; }
+
+        @media print {
+            body { background: #fff; padding: 0; }
+            header, .backup-bar, .tabs, .card:not(.print-card), button, .panel:not(#tab-diploma) { display: none !important; }
+            #tab-diploma { display: block !important; }
+            .diploma-form-card { display: none !important; }
+            .diploma-wrapper { box-shadow: none; max-width: 100%; margin: 0; page-break-inside: avoid; }
+            @page { size: landscape; margin: 0.8cm; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Control de Torneo: Billar a 3 Bandas</h1>
+        <p style="color: var(--text-muted);">Administrador integral con Forfeit (W.O.) en grupos y llaves, capturas WhatsApp y podio completo</p>
+    </header>
+
+    <!-- BARRA DE ACCIONES RÁPIDAS -->
+    <div class="backup-bar">
+        <button class="btn-backup" onclick="exportTournamentJSON()">💾 Guardar Respaldo (.JSON)</button>
+        <label class="btn-backup" style="cursor:pointer; margin:0;">
+            📥 Cargar Respaldo
+            <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importTournamentJSON(event)">
+        </label>
+        <button class="btn-backup" onclick="exportRankingToCSV()">📊 Exportar Torneo Actual (.CSV)</button>
+        <button class="btn-backup" onclick="exportHistoricalToCSV()" style="border-color:#facc15; color:#facc15;">⭐ Exportar Histórico (.CSV)</button>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('tab-jugadores')">1. Inscripciones</button>
+        <button class="tab-btn" onclick="switchTab('tab-pizarra')">📋 Pizarra de Grupos</button>
+        <button class="tab-btn" onclick="switchTab('tab-grupos')">2. Mesas y Partidas</button>
+        <button class="tab-btn" onclick="switchTab('tab-general')">3. Ranking del Torneo</button>
+        <button class="tab-btn" onclick="switchTab('tab-playoffs')">4. Llaves KO</button>
+        <button class="tab-btn" onclick="switchTab('tab-diploma')">5. Diplomas Oficiales</button>
+        <button class="tab-btn" onclick="switchTab('tab-historico')" style="color:#facc15;">⭐ Ranking Histórico</button>
+    </div>
+
+    <!-- PANEL 1: REGISTRO Y HÁNDICAP -->
+    <div id="tab-jugadores" class="panel active">
+        <div class="card">
+            <h2>Registrar Participante</h2>
+            <div class="form-row">
+                <input type="text" id="single-name" placeholder="Nombre y Apellido" style="flex: 2;">
+                <label style="color: var(--text-muted); font-size: 0.9rem;">Meta/HC:</label>
+                <input type="number" id="single-target" value="20" title="Carambolas a las que juega" style="width: 80px;">
+                <button class="btn" onclick="addSinglePlayer()">Agregar</button>
+            </div>
+            <div style="margin-top: 1rem;">
+                <label style="display:block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">
+                    O carga una lista masiva (un jugador por línea):
+                </label>
+                <textarea id="bulk-names" placeholder="Jugador 1&#10;Jugador 2&#10;Jugador 3"></textarea>
+                <button class="btn" style="margin-top: 0.5rem;" onclick="addBulkPlayers()">Cargar Lista Masiva</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>
+                Participantes Registrados (<span id="player-count">0</span>)
+                <button class="btn btn-danger" style="font-size: 0.8rem;" onclick="clearAllData()">Reiniciar Este Torneo</button>
+            </h2>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.8rem;">
+                * Ajusta la meta de carambolas individual directamente en cada casilla si algún jugador tiene ventaja/hándicap.
+            </p>
+            <div id="player-list-container" class="player-list"></div>
+        </div>
+
+        <div class="card">
+            <h2>Crear Fase de Grupos</h2>
+            <div class="form-row">
+                <label for="group-size">Integrantes por grupo:</label>
+                <input type="number" id="group-size" value="3" min="2" max="10" style="width: 80px;">
+                <button class="btn" onclick="generateGroups()">Sortear y Armar Grupos</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANEL PIZARRA COMPACTA CON CAPTURA WHATSAPP -->
+    <div id="tab-pizarra" class="panel">
+        <div class="card" style="margin-bottom: 1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div>
+                <h2 style="margin:0; color:#38bdf8;">Pizarra de Grupos y Jugadores</h2>
+                <p style="color:var(--text-muted); font-size:0.85rem;">Vista panorámica para proyectar en pantallas o televisor del club.</p>
+            </div>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                <button class="btn-whatsapp" onclick="captureAndCopyToWhatsApp('simple-board-container', 'Pizarra_Grupos_Billar')">
+                    📋 Copiar Pizarra para WhatsApp
+                </button>
+                <button class="btn" onclick="toggleFullScreen()">⛶ Pantalla Completa</button>
+            </div>
+        </div>
+        <div id="simple-board-container" class="simple-board-grid" style="padding:10px; border-radius:8px;"></div>
+    </div>
+
+    <!-- PANEL 2: GRUPOS Y PARTIDAS CON BOTÓN FORFEIT POR JUGADOR -->
+    <div id="tab-grupos" class="panel">
+        <div class="card">
+            <h2>
+                <span>Fijar Entradas Globales y Capturas WhatsApp</span>
+                <button class="btn-whatsapp" onclick="openGroupCaptureModal()">
+                    📸 Capturar Grupos para WhatsApp (por bloques de 4)
+                </button>
+            </h2>
+            <div class="form-row">
+                <label for="global-innings">Entradas para todas las partidas:</label>
+                <input type="number" id="global-innings" value="30" style="width: 85px;">
+                <button class="btn" onclick="applyGlobalInnings()">Aplicar a Todos los Partidos</button>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.3rem;">
+                * Puedes pulsar el botón <strong>W.O.</strong> junto al nombre de cualquier jugador que no se presente a tiempo para adjudicar la victoria al rival.
+            </p>
+
+            <!-- Menú interactivo de selección de lotes de 4 grupos -->
+            <div id="group-batch-buttons" style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;"></div>
+        </div>
+        <div id="groups-container" class="groups-grid" style="padding: 10px; border-radius: 8px;"></div>
+    </div>
+
+    <!-- PANEL 3: RANKING DEL TORNEO CON CAPTURA WHATSAPP -->
+    <div id="tab-general" class="panel">
+        <div class="card" id="card-torneo-ranking">
+            <h2>
+                Tabla Acumulada del Torneo Actual
+                <button class="btn-whatsapp" onclick="captureAndCopyToWhatsApp('card-torneo-ranking', 'Ranking_Torneo_Actual')">
+                    📋 Copiar Tabla para WhatsApp
+                </button>
+            </h2>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+                * <strong>PROM GEN:</strong> Promedio real puro (Carambolas reales ÷ Entradas jugadas) para mantener el desempate limpio.
+            </p>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="text-center">#</th>
+                            <th>Jugador</th>
+                            <th class="text-center">Meta/HC</th>
+                            <th class="text-center">Grupo</th>
+                            <th class="text-center">PJ</th>
+                            <th class="text-center">PG</th>
+                            <th class="text-center">CAR REAL</th>
+                            <th class="text-center">ENT</th>
+                            <th class="text-center">PROM GEN</th>
+                            <th class="text-center">HS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="general-ranking-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Generar Cuadro de Eliminación Directa</h2>
+            <div class="form-row">
+                <label for="bracket-size">Clasificados para la llave:</label>
+                <select id="bracket-size">
+                    <option value="4">Mejores 4 (Semifinales)</option>
+                    <option value="8">Mejores 8 (Cuartos)</option>
+                    <option value="16" selected>Mejores 16 (Octavos)</option>
+                    <option value="32">Mejores 32 (Dieciseisavos)</option>
+                </select>
+                <button class="btn" onclick="generatePlayoffs()">Crear Llaves Directas</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANEL 4: PLAYOFFS CON CAPTURA DIVIDIDA POR RONDAS -->
+    <div id="tab-playoffs" class="panel">
+        <div class="card">
+            <h2>
+                <span>Cuadro de Eliminación Directa</span>
+                <button class="btn-whatsapp" onclick="openPlayoffCaptureModal()">
+                    📸 Copiar Rondas KO para WhatsApp (legibles en celular)
+                </button>
+            </h2>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 1rem;">
+                * Ambos perdedores de Semifinales quedan automáticamente consagrados como <strong>3.er Lugar Compartido</strong>.
+            </p>
+
+            <!-- Menú de rondas KO para WhatsApp -->
+            <div id="playoff-batch-buttons" style="margin-bottom: 1.2rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;"></div>
+
+            <div id="bracket-view" class="bracket-container"></div>
+        </div>
+    </div>
+
+    <!-- PANEL 5: DIPLOMAS CON CAPTURA WHATSAPP -->
+    <div id="tab-diploma" class="panel">
+        <div class="card diploma-form-card">
+            <h2>
+                Diplomas de Premiación Oficial (Podio Completo)
+                <button class="btn-whatsapp" onclick="captureAndCopyToWhatsApp('diploma-to-print', 'Diploma_Premiacion_Billar')">
+                    📋 Copiar Diploma para WhatsApp
+                </button>
+            </h2>
+            <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:1rem;">
+                Los nombres se actualizan solos al definir Semifinales y Gran Final. Selecciona el homenajeado a emitir:
+            </p>
+
+            <div style="display:flex; gap:0.6rem; margin-bottom:1.5rem; flex-wrap:wrap;">
+                <button type="button" class="btn btn-gold" id="btn-podium-oro" onclick="selectPodiumDiploma('oro')">🥇 1.er Lugar</button>
+                <button type="button" class="btn btn-silver" id="btn-podium-plata" onclick="selectPodiumDiploma('plata')">🥈 2.º Lugar</button>
+                <button type="button" class="btn btn-bronze" id="btn-podium-bronce1" onclick="selectPodiumDiploma('bronce1')">🥉 3.er Lugar A</button>
+                <button type="button" class="btn btn-bronze" id="btn-podium-bronce2" onclick="selectPodiumDiploma('bronce2')">🥉 3.er Lugar B</button>
+            </div>
+
+            <div class="form-row">
+                <div style="flex: 1; min-width: 240px;">
+                    <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:4px;">Nombre del Premiado:</label>
+                    <input type="text" id="cert-champion" placeholder="Nombre y Apellido" style="width:100%;" oninput="updateDiplomaTexts()">
+                </div>
+                <div style="flex: 1; min-width: 240px;">
+                    <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:4px;">Título del Reconocimiento:</label>
+                    <input type="text" id="cert-title" value="CAMPEÓN INDIVIDUAL" style="width:100%;" oninput="updateDiplomaTexts()">
+                </div>
+            </div>
+            <div class="form-row">
+                <div style="flex: 1; min-width: 240px;">
+                    <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:4px;">Nombre del Campeonato:</label>
+                    <input type="text" id="cert-tournament" value="Torneo Abierto de Billar a 3 Bandas" style="width:100%;" oninput="updateDiplomaTexts()">
+                </div>
+                <div style="flex: 1; min-width: 240px;">
+                    <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:4px;">Club / Sede:</label>
+                    <input type="text" id="cert-club" value="Club de Billares" style="width:100%;" oninput="updateDiplomaTexts()">
+                </div>
+            </div>
+            <div class="form-row">
+                <div style="flex: 1; min-width: 180px;">
+                    <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:4px;">Ciudad:</label>
+                    <input type="text" id="cert-city" value="El Vigía, Mérida" style="width:100%;" oninput="updateDiplomaTexts()">
+                </div>
+                <div style="flex: 1; min-width: 180px;">
+                    <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:4px;">Día y Fecha:</label>
+                    <input type="text" id="cert-date" value="Septiembre de 2026" style="width:100%;" oninput="updateDiplomaTexts()">
+                </div>
+                <div style="flex: 1; min-width: 180px;">
+                    <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:4px;">Comité Organizador:</label>
+                    <input type="text" id="cert-signer" value="Comité Organizador" style="width:100%;" oninput="updateDiplomaTexts()">
+                </div>
+            </div>
+            <div class="form-row">
+                <div style="flex: 1; min-width: 280px;">
+                    <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:4px;">Cargar Logo Oficial (Esquina Superior):</label>
+                    <input type="file" id="logo-file-input" accept="image/*" onchange="loadLogoImage(event)" style="width:100%; padding: 0.4rem;">
+                </div>
+                <div style="display:flex; align-items:flex-end; gap:1rem; padding-top: 20px;">
+                    <button class="btn btn-gold" onclick="window.print()">🖨️ Imprimir Diploma Activo en PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="diploma-wrapper" id="diploma-to-print">
+            <div class="diploma-inner">
+                <img id="view-logo" class="diploma-logo-corner" src="Logo Club Billar_2.png" alt="Logo" onerror="this.style.display='none'">
+                <div class="diploma-title">Certificado de Honor</div>
+                <div class="diploma-subtitle" id="view-title">CAMPEÓN INDIVIDUAL</div>
+                <div class="diploma-award">Se otorga el presente reconocimiento y felicitación a:</div>
+                <div class="diploma-name" id="view-champion">NOMBRE DEL HOMENAJEADO</div>
+                <div class="diploma-desc">
+                    Por su destacada participación, maestría técnica, deportividad y por haberse consagrado en el podio de honor en el:
+                    <br><strong id="view-tournament" style="font-size: 1.15rem; display:block; margin: 6px 0;">Torneo Abierto de Billar a 3 Bandas</strong>
+                    celebrado en las instalaciones de <span id="view-club">Club de Billares</span>.
+                </div>
+                <div style="font-size: 0.95rem; color: #4b5563; margin-bottom: 20px;">
+                    Dado en <strong id="view-city">El Vigía, Mérida</strong>, a fecha de <strong id="view-date">Septiembre de 2026</strong>.
+                </div>
+                <div class="diploma-signatures">
+                    <div class="signature-box">
+                        <span id="view-signer">Comité Organizador</span><br>
+                        <strong>Dirección Técnica</strong>
+                    </div>
+                    <div class="signature-box">
+                        <span>Firma del Presidente</span><br>
+                        <strong>Juez Principal</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANEL 6: RANKING HISTÓRICO CON CAPTURA WHATSAPP -->
+    <div id="tab-historico" class="panel">
+        <div class="card" id="card-historico-ranking" style="border-top: 4px solid #facc15;">
+            <h2>
+                ⭐ Ranking General Histórico Acumulado
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                    <button class="btn-whatsapp" onclick="captureAndCopyToWhatsApp('card-historico-ranking', 'Ranking_Historico_Billar')">
+                        📋 Copiar Ranking para WhatsApp
+                    </button>
+                    <button class="btn btn-gold" style="font-size:0.85rem;" onclick="closeAndRecordTournament()">
+                        🏆 Cerrar y Sumar este Torneo al Histórico
+                    </button>
+                </div>
+            </h2>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+                Ordena a todos los jugadores del club de mejor a peor según su puntaje global acumulado, promedio general histórico y podios obtenidos.
+            </p>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="text-center">Pos</th>
+                            <th>Jugador</th>
+                            <th class="text-center" style="color:#facc15;">Puntos Ranking</th>
+                            <th class="text-center">Torneos</th>
+                            <th class="text-center">🥇 1°</th>
+                            <th class="text-center">🥈 2°</th>
+                            <th class="text-center">🥉 3°</th>
+                            <th class="text-center">PJ</th>
+                            <th class="text-center">PG</th>
+                            <th class="text-center">Carambolas</th>
+                            <th class="text-center">Entradas</th>
+                            <th class="text-center" style="color:#38bdf8;">Promedio Histórico</th>
+                            <th class="text-center">HS Histórica</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historical-ranking-body"></tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <span style="font-size: 0.8rem; color: var(--text-muted);">
+                    * Puntuación por torneo: Campeón (+100 pts), Subcampeón (+70), Ambos 3.os puestos semifinalistas (+50 c/u), Cuartos (+20), Octavos (+10), Base grupos (+5) + 3 pts por victoria.
+                </span>
+                <button class="btn btn-danger" style="font-size:0.8rem;" onclick="resetHistoricalRanking()">
+                    Borrar Historial Acumulado
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let appState = {
+            players: [],
+            groups: [],
+            matches: [],
+            playoffs: null,
+            historicalRanking: {},
+            currentPodium: 'oro',
+            podium: {
+                oro: { id: null, name: '', title: 'CAMPEÓN INDIVIDUAL' },
+                plata: { id: null, name: '', title: 'SUBCAMPEÓN INDIVIDUAL' },
+                bronce1: { id: null, name: '', title: 'TERCER LUGAR (SEMIFINALISTA)' },
+                bronce2: { id: null, name: '', title: 'TERCER LUGAR (SEMIFINALISTA)' }
+            },
+            diplomaMeta: {
+                tournament: 'Torneo Abierto de Billar a 3 Bandas',
+                club: 'Club de Billares',
+                city: 'El Vigía, Mérida',
+                date: 'Septiembre de 2026',
+                signer: 'Comité Organizador',
+                logoData: ''
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('billar_tournament_data_hc');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    appState = Object.assign(appState, parsed);
+                } catch(e) {
+                    console.error("Error al cargar datos:", e);
+                }
+            }
+            if (!appState.historicalRanking) appState.historicalRanking = {};
+            if (!appState.podium) {
+                appState.podium = {
+                    oro: { id: null, name: '', title: 'CAMPEÓN INDIVIDUAL' },
+                    plata: { id: null, name: '', title: 'SUBCAMPEÓN INDIVIDUAL' },
+                    bronce1: { id: null, name: '', title: 'TERCER LUGAR (SEMIFINALISTA)' },
+                    bronce2: { id: null, name: '', title: 'TERCER LUGAR (SEMIFINALISTA)' }
+                };
+            }
+            if (!appState.podium.bronce1) appState.podium.bronce1 = { id: null, name: '', title: 'TERCER LUGAR (SEMIFINALISTA)' };
+            if (!appState.podium.bronce2) appState.podium.bronce2 = { id: null, name: '', title: 'TERCER LUGAR (SEMIFINALISTA)' };
+            
+            detectPodiumFromBracket();
+            loadDiplomaForm();
+            renderPlayers();
+            renderGroups();
+            updateGroupBatchUI();
+            renderSimpleBoard();
+            renderGeneralRanking();
+            renderPlayoffs();
+            updatePlayoffBatchUI();
+            renderDiplomaLive();
+            renderHistoricalRanking();
+        });
+
+        function saveData() {
+            localStorage.setItem('billar_tournament_data_hc', JSON.stringify(appState));
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabId === 'tab-pizarra') renderSimpleBoard();
+            if (tabId === 'tab-general') renderGeneralRanking();
+            if (tabId === 'tab-grupos') {
+                renderGroups();
+                updateGroupBatchUI();
+            }
+            if (tabId === 'tab-playoffs') {
+                renderPlayoffs();
+                updatePlayoffBatchUI();
+            }
+            if (tabId === 'tab-diploma') {
+                detectPodiumFromBracket();
+                loadDiplomaForm();
+                renderDiplomaLive();
+            }
+            if (tabId === 'tab-historico') {
+                detectPodiumFromBracket();
+                renderHistoricalRanking();
+            }
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(e => console.error(e));
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        function cleanPlayerName(str) {
+            if (!str) return '';
+            return str
+                .replace(/\(\d+\)\s*/g, '')
+                .replace(/\[\d+\]\s*/g, '')
+                .replace(/\(W\.O\.\)/gi, '')
+                .trim();
+        }
+
+        /* FUNCIÓN DE CAPTURA DIRECTA AL PORTAPAPELES PARA PEGAR EN WHATSAPP */
+        async function captureAndCopyToWhatsApp(elementId, baseFileName) {
+            const targetEl = document.getElementById(elementId);
+            if (!targetEl) {
+                alert("No se encontró el elemento a capturar.");
+                return;
+            }
+
+            if (typeof html2canvas === 'undefined') {
+                alert("La herramienta de captura se está inicializando o requiere conexión inicial. Reintenta en unos segundos.");
+                return;
+            }
+
+            const buttonsToHide = targetEl.querySelectorAll('.btn-whatsapp, .btn, .btn-backup, .btn-wo');
+            buttonsToHide.forEach(b => b.style.display = 'none');
+
+            try {
+                const canvas = await html2canvas(targetEl, {
+                    backgroundColor: '#0f172a',
+                    scale: 2,
+                    useCORS: true,
+                    logging: false
+                });
+
+                buttonsToHide.forEach(b => b.style.display = '');
+
+                canvas.toBlob(async (blob) => {
+                    if (!blob) {
+                        alert("Error al procesar la imagen.");
+                        return;
+                    }
+
+                    if (navigator.clipboard && navigator.clipboard.write) {
+                        try {
+                            const item = new ClipboardItem({ 'image/png': blob });
+                            await navigator.clipboard.write([item]);
+                            alert("¡Imagen copiada al portapapeles con éxito!\n\nVe a WhatsApp (chat o grupo) y presiona Pegar (Ctrl + V).");
+                            return;
+                        } catch (clipErr) {
+                            console.warn("Fallo al escribir en clipboard directamente:", clipErr);
+                        }
+                    }
+
+                    const fileName = `${baseFileName}_${new Date().toISOString().slice(0, 10)}.png`;
+                    const file = new File([blob], fileName, { type: 'image/png' });
+
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({
+                                files: [file],
+                                title: 'Torneo de Billar a 3 Bandas',
+                                text: 'Resultados oficiales del Torneo:'
+                            });
+                            return;
+                        } catch (shareErr) {
+                            console.warn("Cancelado o no compatible con share:", shareErr);
+                        }
+                    }
+
+                    downloadCanvasImage(canvas, fileName);
+                    alert("La imagen se descargó en tu dispositivo. Ya puedes adjuntarla en WhatsApp.");
+
+                }, 'image/png');
+
+            } catch (err) {
+                buttonsToHide.forEach(b => b.style.display = '');
+                console.error("Error en html2canvas:", err);
+                alert("Ocurrió un inconveniente al generar la captura.");
+            }
+        }
+
+        function downloadCanvasImage(canvas, fileName) {
+            const link = document.createElement('a');
+            link.download = fileName;
+            link.href = canvas.toDataURL('image/png');
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        }
+
+        /* CAPTURA DIVIDIDA EN LOTES DE 4 GRUPOS */
+        function updateGroupBatchUI() {
+            const container = document.getElementById('group-batch-buttons');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const totalGroups = appState.groups.length;
+            if (totalGroups === 0) return;
+
+            const batchCount = Math.ceil(totalGroups / 4);
+
+            let label = document.createElement('span');
+            label.style.fontSize = '0.85rem';
+            label.style.color = 'var(--text-muted)';
+            label.textContent = 'Copiar por bloque de 4:';
+            container.appendChild(label);
+
+            for (let i = 0; i < batchCount; i++) {
+                const startIdx = i * 4;
+                const endIdx = Math.min(startIdx + 4, totalGroups);
+                const startName = appState.groups[startIdx]?.name.replace('Grupo ', '') || `${startIdx+1}`;
+                const endName = appState.groups[endIdx - 1]?.name.replace('Grupo ', '') || `${endIdx}`;
+
+                const btn = document.createElement('button');
+                btn.className = 'btn-whatsapp';
+                btn.style.fontSize = '0.8rem';
+                btn.style.padding = '0.35rem 0.7rem';
+                btn.textContent = `📸 Grupos ${startName} - ${endName}`;
+                btn.onclick = () => captureGroupBatch(startIdx, endIdx);
+                container.appendChild(btn);
+            }
+
+            if (batchCount > 1) {
+                const btnAll = document.createElement('button');
+                btnAll.className = 'btn btn-gold';
+                btnAll.style.fontSize = '0.8rem';
+                btnAll.style.padding = '0.35rem 0.7rem';
+                btnAll.textContent = '📥 Descargar todos los bloques (.PNG)';
+                btnAll.onclick = () => downloadAllGroupBatches();
+                container.appendChild(btnAll);
+            }
+        }
+
+        function openGroupCaptureModal() {
+            if (appState.groups.length === 0) {
+                alert("Aún no has generado grupos para capturar.");
+                return;
+            }
+            const container = document.getElementById('group-batch-buttons');
+            if (container) {
+                container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                container.style.outline = '2px solid var(--whatsapp)';
+                setTimeout(() => { container.style.outline = 'none'; }, 2000);
+            }
+        }
+
+        async function captureGroupBatch(startIndex, endIndex) {
+            const cards = document.querySelectorAll('#groups-container > .card');
+            if (cards.length === 0) return;
+
+            const tempContainer = document.createElement('div');
+            tempContainer.style.position = 'fixed';
+            tempContainer.style.left = '-9999px';
+            tempContainer.style.top = '0';
+            tempContainer.style.width = '960px';
+            tempContainer.style.backgroundColor = '#0f172a';
+            tempContainer.style.padding = '20px';
+            tempContainer.style.display = 'grid';
+            tempContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
+            tempContainer.style.gap = '15px';
+            tempContainer.style.boxSizing = 'border-box';
+
+            for (let i = startIndex; i < endIndex; i++) {
+                if (cards[i]) {
+                    const clone = cards[i].cloneNode(true);
+                    clone.style.margin = '0';
+                    clone.style.boxShadow = 'none';
+                    const woButtons = clone.querySelectorAll('.btn-wo');
+                    woButtons.forEach(b => b.remove());
+                    tempContainer.appendChild(clone);
+                }
+            }
+
+            document.body.appendChild(tempContainer);
+
+            const startName = appState.groups[startIndex]?.name.replace('Grupo ', '') || `${startIndex+1}`;
+            const endName = appState.groups[endIndex - 1]?.name.replace('Grupo ', '') || `${endIndex}`;
+            const baseFileName = `Mesas_Grupos_${startName}_al_${endName}`;
+
+            try {
+                const canvas = await html2canvas(tempContainer, {
+                    backgroundColor: '#0f172a',
+                    scale: 2,
+                    useCORS: true,
+                    logging: false
+                });
+
+                document.body.removeChild(tempContainer);
+
+                canvas.toBlob(async (blob) => {
+                    if (!blob) {
+                        alert("Error al generar la imagen del bloque de grupos.");
+                        return;
+                    }
+
+                    if (navigator.clipboard && navigator.clipboard.write) {
+                        try {
+                            const item = new ClipboardItem({ 'image/png': blob });
+                            await navigator.clipboard.write([item]);
+                            alert(`¡Captura de los Grupos ${startName} al ${endName} copiada con éxito!\n\nVe a WhatsApp y dale Pegar (Ctrl + V).`);
+                            return;
+                        } catch (clipErr) {
+                            console.warn("Fallo al copiar directo:", clipErr);
+                        }
+                    }
+
+                    const fileName = `${baseFileName}_${new Date().toISOString().slice(0, 10)}.png`;
+                    downloadCanvasImage(canvas, fileName);
+                    alert(`Imagen de los Grupos ${startName} al ${endName} descargada. Lista para compartir.`);
+                }, 'image/png');
+
+            } catch (err) {
+                if (document.body.contains(tempContainer)) {
+                    document.body.removeChild(tempContainer);
+                }
+                console.error("Error al capturar bloque:", err);
+                alert("Ocurrió un error al generar la imagen.");
+            }
+        }
+
+        async function downloadAllGroupBatches() {
+            const totalGroups = appState.groups.length;
+            const batchCount = Math.ceil(totalGroups / 4);
+
+            for (let i = 0; i < batchCount; i++) {
+                const startIdx = i * 4;
+                const endIdx = Math.min(startIdx + 4, totalGroups);
+                await captureGroupBatch(startIdx, endIdx);
+                await new Promise(res => setTimeout(res, 800));
+            }
+        }
+
+        /* CAPTURAS DE LLAVES KO DIVIDIDAS POR RONDA (LEGIBLES EN CELULAR) */
+        function updatePlayoffBatchUI() {
+            const container = document.getElementById('playoff-batch-buttons');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!appState.playoffs || !appState.playoffs.rounds || appState.playoffs.rounds.length === 0) return;
+
+            let label = document.createElement('span');
+            label.style.fontSize = '0.85rem';
+            label.style.color = 'var(--text-muted)';
+            label.textContent = 'Copiar ronda para WhatsApp:';
+            container.appendChild(label);
+
+            appState.playoffs.rounds.forEach((round, rIdx) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-whatsapp';
+                btn.style.fontSize = '0.8rem';
+                btn.style.padding = '0.35rem 0.7rem';
+                btn.textContent = `📸 ${round.name}`;
+                btn.onclick = () => capturePlayoffRound(rIdx);
+                container.appendChild(btn);
+            });
+
+            if (appState.playoffs.rounds.length > 1) {
+                const btnAll = document.createElement('button');
+                btnAll.className = 'btn btn-gold';
+                btnAll.style.fontSize = '0.8rem';
+                btnAll.style.padding = '0.35rem 0.7rem';
+                btnAll.textContent = '📥 Descargar todas las rondas (.PNG)';
+                btnAll.onclick = () => downloadAllPlayoffRounds();
+                container.appendChild(btnAll);
+            }
+        }
+
+        function openPlayoffCaptureModal() {
+            if (!appState.playoffs || !appState.playoffs.rounds || appState.playoffs.rounds.length === 0) {
+                alert("Aún no has generado las llaves de eliminación directa.");
+                return;
+            }
+            const container = document.getElementById('playoff-batch-buttons');
+            if (container) {
+                container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                container.style.outline = '2px solid var(--whatsapp)';
+                setTimeout(() => { container.style.outline = 'none'; }, 2000);
+            }
+        }
+
+        async function capturePlayoffRound(roundIdx) {
+            const roundElements = document.querySelectorAll('#bracket-view > .bracket-round');
+            const targetRoundEl = roundElements[roundIdx];
+            if (!targetRoundEl) {
+                alert("No se encontró la ronda seleccionada.");
+                return;
+            }
+
+            const roundName = appState.playoffs.rounds[roundIdx]?.name || `Ronda_${roundIdx+1}`;
+
+            const tempContainer = document.createElement('div');
+            tempContainer.style.position = 'fixed';
+            tempContainer.style.left = '-9999px';
+            tempContainer.style.top = '0';
+            tempContainer.style.width = '480px';
+            tempContainer.style.backgroundColor = '#0f172a';
+            tempContainer.style.padding = '20px';
+            tempContainer.style.borderRadius = '10px';
+            tempContainer.style.boxSizing = 'border-box';
+
+            const headerTitle = document.createElement('div');
+            headerTitle.style.textAlign = 'center';
+            headerTitle.style.marginBottom = '15px';
+            headerTitle.innerHTML = `
+                <div style="color:#38bdf8; font-weight:bold; font-size:1.2rem; text-transform:uppercase; letter-spacing:1px;">
+                    ${appState.diplomaMeta?.tournament || 'Torneo de Billar a 3 Bandas'}
+                </div>
+                <div style="color:#facc15; font-weight:bold; font-size:1.1rem; margin-top:4px;">
+                    ${roundName}
+                </div>
+            `;
+            tempContainer.appendChild(headerTitle);
+
+            const clone = targetRoundEl.cloneNode(true);
+            const h3 = clone.querySelector('h3');
+            if (h3) h3.remove();
+
+            const woButtons = clone.querySelectorAll('.btn-wo');
+            woButtons.forEach(b => b.remove());
+
+            tempContainer.appendChild(clone);
+            document.body.appendChild(tempContainer);
+
+            try {
+                const canvas = await html2canvas(tempContainer, {
+                    backgroundColor: '#0f172a',
+                    scale: 2,
+                    useCORS: true,
+                    logging: false
+                });
+
+                document.body.removeChild(tempContainer);
+
+                const cleanRoundName = roundName.replace(/\s+/g, '_');
+                const baseFileName = `KO_${cleanRoundName}`;
+
+                canvas.toBlob(async (blob) => {
+                    if (!blob) {
+                        alert("Error al generar la imagen de la ronda.");
+                        return;
+                    }
+
+                    if (navigator.clipboard && navigator.clipboard.write) {
+                        try {
+                            const item = new ClipboardItem({ 'image/png': blob });
+                            await navigator.clipboard.write([item]);
+                            alert(`¡Captura de ${roundName} copiada con éxito!\n\nVe a WhatsApp y dale Pegar (Ctrl + V).`);
+                            return;
+                        } catch (clipErr) {
+                            console.warn("Fallo al copiar directo:", clipErr);
+                        }
+                    }
+
+                    const fileName = `${baseFileName}_${new Date().toISOString().slice(0, 10)}.png`;
+                    downloadCanvasImage(canvas, fileName);
+                    alert(`Imagen de ${roundName} descargada. Lista para compartir.`);
+                }, 'image/png');
+
+            } catch (err) {
+                if (document.body.contains(tempContainer)) {
+                    document.body.removeChild(tempContainer);
+                }
+                console.error("Error al capturar ronda KO:", err);
+                alert("Ocurrió un error al generar la captura de la ronda.");
+            }
+        }
+
+        async function downloadAllPlayoffRounds() {
+            if (!appState.playoffs || !appState.playoffs.rounds) return;
+            for (let i = 0; i < appState.playoffs.rounds.length; i++) {
+                await capturePlayoffRound(i);
+                await new Promise(res => setTimeout(res, 800));
+            }
+        }
+
+        /* RESPALDOS Y EXPORTACIÓN */
+        function exportTournamentJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
+            const downloadAnchor = document.createElement('a');
+            const dateStr = new Date().toISOString().slice(0, 10);
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `respaldo_torneo_billar_${dateStr}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importTournamentJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    appState = Object.assign(appState, imported);
+                    saveData();
+                    detectPodiumFromBracket();
+                    loadDiplomaForm();
+                    renderPlayers();
+                    renderGroups();
+                    updateGroupBatchUI();
+                    renderSimpleBoard();
+                    renderGeneralRanking();
+                    renderPlayoffs();
+                    updatePlayoffBatchUI();
+                    renderDiplomaLive();
+                    renderHistoricalRanking();
+                    alert("Respaldo restaurado exitosamente.");
+                } catch(err) {
+                    alert("Error al leer el archivo JSON de respaldo.");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function exportRankingToCSV() {
+            const ranking = getGeneralRanking();
+            if (ranking.length === 0) {
+                alert("No hay datos de ranking disponibles para exportar.");
+                return;
+            }
+
+            let csv = "\uFEFFPuesto,Jugador,Meta/HC,Grupo,Partidas Jugadas,Partidas Ganadas,Carambolas Reales,Entradas,Promedio General,Serie Mayor\n";
+            ranking.forEach((p, idx) => {
+                csv += `"${idx + 1}","${p.name}","${p.target}","${p.groupName}",${p.pj},${p.pg},${p.car},${p.inn},"${p.prom.toFixed(3)}",${p.hs}\n`;
+            });
+
+            downloadCSV(csv, `ranking_torneo_actual_${new Date().toISOString().slice(0, 10)}.csv`);
+        }
+
+        function exportHistoricalToCSV() {
+            const list = getSortedHistoricalList();
+            if (list.length === 0) {
+                alert("No hay registros en el ranking histórico.");
+                return;
+            }
+
+            let csv = "\uFEFFPosicion,Jugador,Puntos Ranking,Torneos Jugados,1er Lugar (Oro),2do Lugar (Plata),3er Lugar (Bronce),Partidas Jugadas,Partidas Ganadas,Carambolas Totales,Entradas Totales,Promedio Historico,Mayor Serie Historica\n";
+            list.forEach((p, idx) => {
+                csv += `"${idx + 1}","${p.name}",${p.points},${p.tournaments},${p.first},${p.second},${p.third},${p.pj},${p.pg},${p.car},${p.inn},"${p.prom.toFixed(3)}",${p.hs}\n`;
+            });
+
+            downloadCSV(csv, `ranking_historico_acumulado_${new Date().toISOString().slice(0, 10)}.csv`);
+        }
+
+        function downloadCSV(csvContent, filename) {
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", url);
+            downloadAnchor.setAttribute("download", filename);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        /* PIZARRA COMPACTA */
+        function renderSimpleBoard() {
+            const container = document.getElementById('simple-board-container');
+            container.innerHTML = '';
+
+            if (appState.groups.length === 0) {
+                container.innerHTML = `<p style="color:var(--text-muted); grid-column: 1 / -1; text-align:center; padding:2rem;">Aún no se han generado los grupos.</p>`;
+                return;
+            }
+
+            appState.groups.forEach(g => {
+                const card = document.createElement('div');
+                card.className = 'simple-board-card';
+
+                let listHtml = '';
+                g.playerIds.forEach((id, idx) => {
+                    const p = appState.players.find(x => x.id === id);
+                    const name = p ? p.name : 'Desconocido';
+                    const target = p ? (p.target || 20) : 20;
+
+                    listHtml += `
+                        <li>
+                            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:140px;" title="${name}">
+                                <strong>${idx + 1}.</strong> ${name}
+                            </span>
+                            <span class="badge-dist">${target}c</span>
+                        </li>
+                    `;
+                });
+
+                card.innerHTML = `
+                    <h3>${g.name}</h3>
+                    <ul>${listHtml}</ul>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function applyGlobalInnings() {
+            const inningsVal = document.getElementById('global-innings').value;
+            if (inningsVal === '' || isNaN(parseInt(inningsVal))) {
+                alert("Ingresa un número válido de entradas.");
+                return;
+            }
+
+            if (appState.matches.length === 0) {
+                alert("Aún no has generado grupos con partidas.");
+                return;
+            }
+
+            if (confirm(`¿Deseas fijar ${inningsVal} entradas en todas las partidas de la fase de grupos?`)) {
+                appState.matches.forEach(m => {
+                    m.inn = inningsVal;
+                    if (m.carA !== '' && m.carB !== '') {
+                        m.done = true;
+                    }
+                });
+                saveData();
+                renderGroups();
+                renderGeneralRanking();
+                alert(`Entradas actualizadas a ${inningsVal} en todas las partidas.`);
+            }
+        }
+
+        /* JUGADORES */
+        function addSinglePlayer() {
+            const nameInput = document.getElementById('single-name');
+            const targetInput = document.getElementById('single-target');
+            const name = nameInput.value.trim();
+            const target = parseInt(targetInput.value) || 20;
+
+            if (!name) return;
+            appState.players.push({
+                id: Date.now().toString(),
+                name: name,
+                target: target
+            });
+            nameInput.value = '';
+            saveData();
+            renderPlayers();
+        }
+
+        function addBulkPlayers() {
+            const textarea = document.getElementById('bulk-names');
+            const lines = textarea.value.split('\n');
+            lines.forEach(line => {
+                const name = line.trim();
+                if (name) {
+                    appState.players.push({
+                        id: Math.random().toString(36).substring(2, 9),
+                        name: name,
+                        target: 20
+                    });
+                }
+            });
+            textarea.value = '';
+            saveData();
+            renderPlayers();
+        }
+
+        function updatePlayerTarget(id, newTarget) {
+            const p = appState.players.find(x => x.id === id);
+            if (p) {
+                p.target = parseInt(newTarget) || 20;
+                saveData();
+                renderGroups();
+                renderSimpleBoard();
+            }
+        }
+
+        function removePlayer(id) {
+            appState.players = appState.players.filter(p => p.id !== id);
+            saveData();
+            renderPlayers();
+        }
+
+        function clearAllData() {
+            if (confirm("¿Reiniciar el torneo actual? El ranking histórico NO se borrará.")) {
+                appState.players = [];
+                appState.groups = [];
+                appState.matches = [];
+                appState.playoffs = null;
+                appState.podium = {
+                    oro: { id: null, name: '', title: 'CAMPEÓN INDIVIDUAL' },
+                    plata: { id: null, name: '', title: 'SUBCAMPEÓN INDIVIDUAL' },
+                    bronce1: { id: null, name: '', title: 'TERCER LUGAR (SEMIFINALISTA)' },
+                    bronce2: { id: null, name: '', title: 'TERCER LUGAR (SEMIFINALISTA)' }
+                };
+                saveData();
+                renderPlayers();
+                renderGroups();
+                updateGroupBatchUI();
+                renderSimpleBoard();
+                renderGeneralRanking();
+                renderPlayoffs();
+                updatePlayoffBatchUI();
+                loadDiplomaForm();
+                renderDiplomaLive();
+            }
+        }
+
+        function renderPlayers() {
+            const container = document.getElementById('player-list-container');
+            document.getElementById('player-count').textContent = appState.players.length;
+            container.innerHTML = '';
+
+            appState.players.forEach((p, idx) => {
+                const div = document.createElement('div');
+                div.className = 'player-item';
+                div.innerHTML = `
+                    <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                        <strong>${idx + 1}.</strong> ${p.name}
+                    </span>
+                    <div style="display:flex; align-items:center; gap:0.3rem;">
+                        <span style="font-size:0.75rem; color:var(--text-muted);">Meta:</span>
+                        <input type="number" value="${p.target || 20}" style="width:55px; padding:3px; text-align:center;" 
+                            onchange="updatePlayerTarget('${p.id}', this.value)">
+                    </div>
+                    <button onclick="removePlayer('${p.id}')" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:1.1rem;">&times;</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        /* GRUPOS */
+        function generateGroups() {
+            if (appState.players.length < 3) {
+                alert("Debes registrar al menos 3 jugadores.");
+                return;
+            }
+
+            const size = parseInt(document.getElementById('group-size').value) || 3;
+            const shuffled = [...appState.players].sort(() => Math.random() - 0.5);
+            const numGroups = Math.ceil(shuffled.length / size);
+            
+            appState.groups = [];
+            appState.matches = [];
+
+            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+            for (let i = 0; i < numGroups; i++) {
+                appState.groups.push({
+                    id: i,
+                    name: `Grupo ${alphabet[i] || `G${i+1}`}`,
+                    playerIds: []
+                });
+            }
+
+            shuffled.forEach((player, idx) => {
+                appState.groups[idx % numGroups].playerIds.push(player.id);
+            });
+
+            appState.groups.forEach(g => {
+                const pIds = g.playerIds;
+                for (let i = 0; i < pIds.length; i++) {
+                    for (let j = i + 1; j < pIds.length; j++) {
+                        appState.matches.push({
+                            id: Math.random().toString(36).substring(2, 9),
+                            groupId: g.id,
+                            playerA: pIds[i],
+                            playerB: pIds[j],
+                            carA: '',
+                            carB: '',
+                            inn: '',
+                            hsA: '',
+                            hsB: '',
+                            isWOA: false,
+                            isWOB: false,
+                            done: false
+                        });
+                    }
+                }
+            });
+
+            saveData();
+            renderGroups();
+            updateGroupBatchUI();
+            renderSimpleBoard();
+            alert("Grupos creados con éxito.");
+            switchTab('tab-pizarra');
+        }
+
+        function getPlayerStats(playerId) {
+            let stats = { pj: 0, pg: 0, car: 0, carContra: 0, inn: 0, hs: 0 };
+            const me = appState.players.find(x => x.id === playerId);
+            const myTarget = me ? (me.target || 20) : 20;
+
+            appState.matches.forEach(m => {
+                if (!m.done) return;
+                
+                const isA = m.playerA === playerId;
+                const isB = m.playerB === playerId;
+                if (!isA && !isB) return;
+
+                stats.pj++;
+                const opponentId = isA ? m.playerB : m.playerA;
+                const opponent = appState.players.find(x => x.id === opponentId);
+                const oppTarget = opponent ? (opponent.target || 20) : 20;
+
+                const myCar = parseInt(isA ? m.carA : m.carB) || 0;
+                const oppCar = parseInt(isA ? m.carB : m.carA) || 0;
+                const inn = parseInt(m.inn) || 0;
+                const myHs = parseInt(isA ? m.hsA : m.hsB) || 0;
+
+                stats.car += myCar;
+                stats.carContra += oppCar;
+                stats.inn += inn;
+                if (myHs > stats.hs) stats.hs = myHs;
+
+                // Casos especiales de W.O. directo
+                if (isA && m.isWOA) return; // perdió por forfeit
+                if (isB && m.isWOB) return; // perdió por forfeit
+                if (isA && m.isWOB) { stats.pg++; return; } // ganó por forfeit del rival
+                if (isB && m.isWOA) { stats.pg++; return; } // ganó por forfeit del rival
+
+                const myCompleted = myCar >= myTarget;
+                const oppCompleted = oppCar >= oppTarget;
+
+                if (myCompleted && !oppCompleted) {
+                    stats.pg++;
+                } else if (!myCompleted && oppCompleted) {
+                    // Ganó rival
+                } else {
+                    const myRatio = myCar / myTarget;
+                    const oppRatio = oppCar / oppTarget;
+                    if (myRatio > oppRatio) {
+                        stats.pg++;
+                    }
+                }
+            });
+
+            stats.prom = stats.inn > 0 ? (stats.car / stats.inn) : 0;
+            return stats;
+        }
+
+        /* FORFEIT EN FASE DE GRUPOS */
+        function applyGroupForfeit(matchId, loserKey) {
+            const m = appState.matches.find(x => x.id === matchId);
+            if (!m) return;
+
+            const pA = appState.players.find(x => x.id === m.playerA);
+            const pB = appState.players.find(x => x.id === m.playerB);
+            const nameA = pA ? pA.name : 'J1';
+            const nameB = pB ? pB.name : 'J2';
+            const targetA = pA ? (pA.target || 20) : 20;
+            const targetB = pB ? (pB.target || 20) : 20;
+
+            const loserName = (loserKey === 'A') ? nameA : nameB;
+            const winnerName = (loserKey === 'A') ? nameB : nameA;
+
+            if (confirm(`¿Declarar Forfeit (W.O.) a ${loserName} por no presentarse a tiempo?\n\nSe adjudicará la victoria a ${winnerName}.`)) {
+                const defaultInn = document.getElementById('global-innings')?.value || 30;
+
+                if (loserKey === 'A') {
+                    m.isWOA = true;
+                    m.isWOB = false;
+                    m.carA = 0;
+                    m.carB = targetB;
+                } else {
+                    m.isWOB = true;
+                    m.isWOA = false;
+                    m.carB = 0;
+                    m.carA = targetA;
+                }
+
+                if (!m.inn || m.inn === '') {
+                    m.inn = parseInt(defaultInn) || 30;
+                }
+
+                m.done = true;
+                saveData();
+                renderGroups();
+                renderGeneralRanking();
+            }
+        }
+
+        function renderGroups() {
+            const container = document.getElementById('groups-container');
+            container.innerHTML = '';
+
+            if (appState.groups.length === 0) {
+                container.innerHTML = `<p style="color:var(--text-muted);">No hay grupos creados todavía.</p>`;
+                return;
+            }
+
+            appState.groups.forEach(g => {
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                const groupPlayersData = g.playerIds.map(id => {
+                    const p = appState.players.find(x => x.id === id) || { name: 'Desconocido', target: 20 };
+                    const stats = getPlayerStats(id);
+                    return { id, name: p.name, target: p.target, ...stats };
+                });
+
+                groupPlayersData.sort((a, b) => {
+                    if (b.pg !== a.pg) return b.pg - a.pg;
+                    if (b.prom !== a.prom) return b.prom - a.prom;
+                    if (b.hs !== a.hs) return b.hs - a.hs;
+                    return b.car - a.car;
+                });
+
+                let tableRowsHtml = groupPlayersData.map((p, idx) => `
+                    <tr>
+                        <td class="text-center font-bold">${idx + 1}</td>
+                        <td>${p.name} <span class="badge-dist">${p.target || 20}c</span></td>
+                        <td class="text-center font-bold" style="color:#facc15;">${p.pg}</td>
+                        <td class="text-center font-bold" style="color:#facc15;">${p.car}</td>
+                        <td class="text-center font-bold" style="color:#38bdf8;">${p.inn}</td>
+                        <td class="text-center font-bold" style="color:#22c55e;">${p.prom.toFixed(3)}</td>
+                        <td class="text-center">${p.hs}</td>
+                    </tr>
+                `).join('');
+
+                const groupMatches = appState.matches.filter(m => m.groupId === g.id);
+                let matchesHtml = groupMatches.map(m => {
+                    const pA = appState.players.find(x => x.id === m.playerA);
+                    const pB = appState.players.find(x => x.id === m.playerB);
+                    const nameA = pA?.name || 'J1';
+                    const nameB = pB?.name || 'J2';
+                    const targetA = pA?.target || 20;
+                    const targetB = pB?.target || 20;
+
+                    const isWOA = m.isWOA;
+                    const isWOB = m.isWOB;
+
+                    return `
+                        <div class="match-row">
+                            <div class="match-header">
+                                <span>${nameA} (a ${targetA})</span>
+                                <span>vs</span>
+                                <span>(a ${targetB}) ${nameB}</span>
+                            </div>
+                            <div class="match-inputs">
+                                <div class="player-match-side side-left ${isWOA ? 'loser-wo' : ''}">
+                                    <button class="btn-wo" title="Declarar Forfeit a ${nameA}" onclick="applyGroupForfeit('${m.id}', 'A')">W.O.</button>
+                                    <span class="player-match-name" title="${nameA}">${nameA} ${isWOA ? '(W.O.)' : ''}</span>
+                                </div>
+                                <input type="number" class="input-car" placeholder="0" value="${m.carA}" title="Carambolas J1" 
+                                    ${isWOA || isWOB ? 'disabled' : ''}
+                                    onchange="updateMatch('${m.id}', 'carA', this.value)">
+                                <input type="number" class="input-inn" placeholder="Ent" value="${m.inn}" title="Entradas del Partido" onchange="updateMatch('${m.id}', 'inn', this.value)">
+                                <input type="number" class="input-car" placeholder="0" value="${m.carB}" title="Carambolas J2" 
+                                    ${isWOA || isWOB ? 'disabled' : ''}
+                                    onchange="updateMatch('${m.id}', 'carB', this.value)">
+                                <div class="player-match-side side-right ${isWOB ? 'loser-wo' : ''}">
+                                    <span class="player-match-name" title="${nameB}">${isWOB ? '(W.O.) ' : ''}${nameB}</span>
+                                    <button class="btn-wo" title="Declarar Forfeit a ${nameB}" onclick="applyGroupForfeit('${m.id}', 'B')">W.O.</button>
+                                </div>
+                            </div>
+                            <div class="match-meta">
+                                <span>HS 1: <input type="number" style="width:50px; padding:2px; text-align:center;" value="${m.hsA}" onchange="updateMatch('${m.id}', 'hsA', this.value)"></span>
+                                <label><input type="checkbox" ${m.done ? 'checked' : ''} onchange="updateMatch('${m.id}', 'done', this.checked)"> Completado</label>
+                                <span>HS 2: <input type="number" style="width:50px; padding:2px; text-align:center;" value="${m.hsB}" onchange="updateMatch('${m.id}', 'hsB', this.value)"></span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                card.innerHTML = `
+                    <h2>${g.name}</h2>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="text-center">#</th>
+                                    <th>Jugador</th>
+                                    <th class="text-center">PG</th>
+                                    <th class="text-center">CAR</th>
+                                    <th class="text-center">ENT</th>
+                                    <th class="text-center">PROM</th>
+                                    <th class="text-center">HS</th>
+                                </tr>
+                            </thead>
+                            <tbody>${tableRowsHtml}</tbody>
+                        </table>
+                    </div>
+                    <h3 style="font-size:0.95rem; margin: 1.2rem 0 0.6rem 0; color: #38bdf8;">Enfrentamientos</h3>
+                    <div>${matchesHtml}</div>
+                `;
+
+                container.appendChild(card);
+            });
+
+            updateGroupBatchUI();
+        }
+
+        function updateMatch(matchId, field, value) {
+            const match = appState.matches.find(m => m.id === matchId);
+            if (!match) return;
+            
+            if (field === 'done') {
+                match.done = value;
+            } else {
+                match[field] = value;
+                match.isWOA = false;
+                match.isWOB = false;
+                if (match.carA !== '' && match.carB !== '' && match.inn !== '') {
+                    match.done = true;
+                }
+            }
+            saveData();
+            renderGroups();
+        }
+
+        function getGeneralRanking() {
+            let ranking = appState.players.map(p => {
+                const stats = getPlayerStats(p.id);
+                const grp = appState.groups.find(g => g.playerIds.includes(p.id));
+                return {
+                    id: p.id,
+                    name: p.name,
+                    target: p.target || 20,
+                    groupName: grp ? grp.name : '-',
+                    ...stats
+                };
+            });
+
+            ranking.sort((a, b) => {
+                if (b.pg !== a.pg) return b.pg - a.pg;
+                if (b.prom !== a.prom) return b.prom - a.prom;
+                if (b.hs !== a.hs) return b.hs - a.hs;
+                return b.car - a.car;
+            });
+
+            return ranking;
+        }
+
+        function renderGeneralRanking() {
+            const tbody = document.getElementById('general-ranking-body');
+            tbody.innerHTML = '';
+
+            const ranking = getGeneralRanking();
+            ranking.forEach((p, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="text-center font-bold">${idx + 1}</td>
+                    <td>${p.name}</td>
+                    <td class="text-center">${p.target}</td>
+                    <td class="text-center">${p.groupName}</td>
+                    <td class="text-center">${p.pj}</td>
+                    <td class="text-center font-bold" style="color:#facc15;">${p.pg}</td>
+                    <td class="text-center font-bold" style="color:#facc15;">${p.car}</td>
+                    <td class="text-center font-bold" style="color:#38bdf8;">${p.inn}</td>
+                    <td class="text-center font-bold" style="color:#22c55e;">${p.prom.toFixed(3)}</td>
+                    <td class="text-center">${p.hs}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        /* PLAYOFFS */
+        function generatePlayoffs() {
+            const size = parseInt(document.getElementById('bracket-size').value) || 16;
+            const ranking = getGeneralRanking();
+
+            if (ranking.length < size) {
+                alert(`Faltan jugadores para armar una llave de ${size}. Hay ${ranking.length}.`);
+                return;
+            }
+
+            const qualified = ranking.slice(0, size);
+            let rounds = [];
+            
+            let firstRoundMatches = [];
+            for (let i = 0; i < size / 2; i++) {
+                const p1 = qualified[i];
+                const p2 = qualified[size - 1 - i];
+                firstRoundMatches.push({
+                    id: `R1_M${i+1}`,
+                    day: '',
+                    time: '',
+                    table: `Mesa ${(i % 2) + 1}`,
+                    p1: { id: p1.id, name: `(${i+1}) ${p1.name} [${p1.target || 20}]`, score: '', target: p1.target || 20, isWO: false },
+                    p2: { id: p2.id, name: `(${size-i}) ${p2.name} [${p2.target || 20}]`, score: '', target: p2.target || 20, isWO: false },
+                    winner: null
+                });
+            }
+            rounds.push({ name: getRoundName(size), matches: firstRoundMatches });
+
+            let matchesInRound = size / 4;
+            let roundIdx = 2;
+            while (matchesInRound >= 1) {
+                let matches = [];
+                for (let i = 0; i < matchesInRound; i++) {
+                    matches.push({
+                        id: `R${roundIdx}_M${i+1}`,
+                        day: '',
+                        time: '',
+                        table: `Mesa ${(i % 2) + 1}`,
+                        p1: { id: null, name: 'Por definir', score: '', target: 20, isWO: false },
+                        p2: { id: null, name: 'Por definir', score: '', target: 20, isWO: false },
+                        winner: null
+                    });
+                }
+                rounds.push({ name: getRoundName(matchesInRound * 2), matches });
+                matchesInRound /= 2;
+                roundIdx++;
+            }
+
+            appState.playoffs = { rounds };
+            saveData();
+            detectPodiumFromBracket();
+            renderPlayoffs();
+            updatePlayoffBatchUI();
+            switchTab('tab-playoffs');
+        }
+
+        function getRoundName(count) {
+            if (count === 2) return "Gran Final";
+            if (count === 4) return "Semifinales";
+            if (count === 8) return "Cuartos de Final";
+            if (count === 16) return "Octavos de Final";
+            return `Ronda de ${count}`;
+        }
+
+        function renderPlayoffs() {
+            const container = document.getElementById('bracket-view');
+            container.innerHTML = '';
+
+            if (!appState.playoffs || !appState.playoffs.rounds) {
+                container.innerHTML = `<p style="color:var(--text-muted); padding:2rem; text-align:center;">Aún no se han generado las llaves de eliminación directa.</p>`;
+                return;
+            }
+
+            appState.playoffs.rounds.forEach((round, rIdx) => {
+                const roundDiv = document.createElement('div');
+                roundDiv.className = 'bracket-round';
+                roundDiv.innerHTML = `<h3 style="text-align:center; color:#facc15; margin-bottom:1rem;">${round.name}</h3>`;
+
+                round.matches.forEach((m, mIdx) => {
+                    const matchDiv = document.createElement('div');
+                    matchDiv.className = 'bracket-match';
+
+                    const isP1Win = m.winner === m.p1.id && m.p1.id !== null;
+                    const isP2Win = m.winner === m.p2.id && m.p2.id !== null;
+                    const isP1WO = m.p1.isWO;
+                    const isP2WO = m.p2.isWO;
+
+                    matchDiv.innerHTML = `
+                        <div class="bracket-schedule">
+                            <input type="text" placeholder="Día/Fecha" value="${m.day || ''}" style="flex:1;" 
+                                onchange="updateMatchSchedule(${rIdx}, ${mIdx}, 'day', this.value)">
+                            <input type="text" placeholder="Hora" value="${m.time || ''}" style="width:75px;" 
+                                onchange="updateMatchSchedule(${rIdx}, ${mIdx}, 'time', this.value)">
+                            <input type="text" placeholder="Mesa" value="${m.table || ''}" style="width:65px;" 
+                                onchange="updateMatchSchedule(${rIdx}, ${mIdx}, 'table', this.value)">
+                        </div>
+                        <div class="bracket-team ${isP1Win ? 'winner' : ''} ${isP1WO ? 'loser-wo' : ''}">
+                            <span style="font-size:0.85rem; font-weight:600; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${m.p1.name}">
+                                ${m.p1.name} ${isP1WO ? '(W.O.)' : ''}
+                            </span>
+                            ${m.p1.id ? `<button class="btn-wo" title="Declarar Forfeit" onclick="applyForfeit(${rIdx}, ${mIdx}, 'p1')">W.O.</button>` : ''}
+                            <input type="number" class="input-ko-score" placeholder="0" value="${m.p1.score}" 
+                                ${isP1WO || isP2WO ? 'disabled' : ''}
+                                onchange="updatePlayoffScore(${rIdx}, ${mIdx}, 'p1', this.value)">
+                        </div>
+                        <div class="bracket-team ${isP2Win ? 'winner' : ''} ${isP2WO ? 'loser-wo' : ''}">
+                            <span style="font-size:0.85rem; font-weight:600; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${m.p2.name}">
+                                ${m.p2.name} ${isP2WO ? '(W.O.)' : ''}
+                            </span>
+                            ${m.p2.id ? `<button class="btn-wo" title="Declarar Forfeit" onclick="applyForfeit(${rIdx}, ${mIdx}, 'p2')">W.O.</button>` : ''}
+                            <input type="number" class="input-ko-score" placeholder="0" value="${m.p2.score}" 
+                                ${isP1WO || isP2WO ? 'disabled' : ''}
+                                onchange="updatePlayoffScore(${rIdx}, ${mIdx}, 'p2', this.value)">
+                        </div>
+                    `;
+                    roundDiv.appendChild(matchDiv);
+                });
+
+                container.appendChild(roundDiv);
+            });
+
+            updatePlayoffBatchUI();
+        }
+
+        function updateMatchSchedule(roundIdx, matchIdx, field, val) {
+            const match = appState.playoffs.rounds[roundIdx].matches[matchIdx];
+            match[field] = val;
+            saveData();
+        }
+
+        function applyForfeit(roundIdx, matchIdx, loserKey) {
+            const round = appState.playoffs.rounds[roundIdx];
+            const match = round.matches[matchIdx];
+            const loser = match[loserKey];
+            const winnerKey = (loserKey === 'p1') ? 'p2' : 'p1';
+            const winner = match[winnerKey];
+
+            if (!loser.id || !winner.id) {
+                alert("Ambos jugadores deben estar definidos para aplicar Forfeit.");
+                return;
+            }
+
+            if (confirm(`¿Declarar Forfeit (W.O.) a ${loser.name}? El pase será otorgado a ${winner.name}.`)) {
+                loser.isWO = true;
+                winner.isWO = false;
+                loser.score = 0;
+                winner.score = winner.target || 20;
+                match.winner = winner.id;
+
+                advanceWinnerToNextRound(roundIdx, matchIdx, winner);
+                detectPodiumFromBracket();
+                saveData();
+                renderPlayoffs();
+            }
+        }
+
+        function updatePlayoffScore(roundIdx, matchIdx, playerKey, val) {
+            const round = appState.playoffs.rounds[roundIdx];
+            const match = round.matches[matchIdx];
+            match[playerKey].score = val;
+            match.p1.isWO = false;
+            match.p2.isWO = false;
+
+            const s1 = parseInt(match.p1.score);
+            const s2 = parseInt(match.p2.score);
+            const t1 = parseInt(match.p1.target) || 20;
+            const t2 = parseInt(match.p2.target) || 20;
+
+            if (!isNaN(s1) && !isNaN(s2)) {
+                let winnerObj = null;
+                
+                if (s1 >= t1 && s2 < t2) { winnerObj = match.p1; }
+                else if (s2 >= t2 && s1 < t1) { winnerObj = match.p2; }
+                else {
+                    if ((s1 / t1) > (s2 / t2)) { winnerObj = match.p1; }
+                    else if ((s2 / t2) > (s1 / t1)) { winnerObj = match.p2; }
+                }
+
+                if (winnerObj) {
+                    match.winner = winnerObj.id;
+                    advanceWinnerToNextRound(roundIdx, matchIdx, winnerObj);
+                    detectPodiumFromBracket();
+                }
+            }
+            saveData();
+            renderPlayoffs();
+        }
+
+        function advanceWinnerToNextRound(roundIdx, matchIdx, winnerObj) {
+            const rounds = appState.playoffs.rounds;
+            const totalRounds = rounds.length;
+
+            if (roundIdx + 1 < totalRounds) {
+                const nextRound = rounds[roundIdx + 1];
+                const nextMatchIdx = Math.floor(matchIdx / 2);
+                const nextPlayerKey = (matchIdx % 2 === 0) ? 'p1' : 'p2';
+
+                nextRound.matches[nextMatchIdx][nextPlayerKey] = {
+                    id: winnerObj.id,
+                    name: winnerObj.name,
+                    score: '',
+                    target: winnerObj.target || 20,
+                    isWO: false
+                };
+            }
+        }
+
+        /* DETECCIÓN EXACTA DEL PODIO DESDE EL ÁRBOL KO */
+        function detectPodiumFromBracket() {
+            if (!appState.playoffs || !appState.playoffs.rounds) return;
+
+            const rounds = appState.playoffs.rounds;
+            const totalRounds = rounds.length;
+
+            // 1. Semifinales: La ronda que tiene exactamente 2 partidos
+            const semiRoundIdx = rounds.findIndex(r => r.matches && r.matches.length === 2);
+            if (semiRoundIdx !== -1) {
+                const semiMatches = rounds[semiRoundIdx].matches;
+                
+                // Semifinal 1
+                const m1 = semiMatches[0];
+                if (m1 && m1.winner) {
+                    const loser1 = (m1.winner === m1.p1.id) ? m1.p2 : m1.p1;
+                    appState.podium.bronce1.id = loser1.id;
+                    appState.podium.bronce1.name = cleanPlayerName(loser1.name);
+                }
+
+                // Semifinal 2
+                const m2 = semiMatches[1];
+                if (m2 && m2.winner) {
+                    const loser2 = (m2.winner === m2.p1.id) ? m2.p2 : m2.p1;
+                    appState.podium.bronce2.id = loser2.id;
+                    appState.podium.bronce2.name = cleanPlayerName(loser2.name);
+                }
+            }
+
+            // 2. Gran Final: La última ronda
+            const finalRound = rounds[totalRounds - 1];
+            if (finalRound && finalRound.matches && finalRound.matches.length === 1) {
+                const finalMatch = finalRound.matches[0];
+                if (finalMatch && finalMatch.winner) {
+                    const champ = (finalMatch.winner === finalMatch.p1.id) ? finalMatch.p1 : finalMatch.p2;
+                    const sub = (finalMatch.winner === finalMatch.p1.id) ? finalMatch.p2 : finalMatch.p1;
+
+                    appState.podium.oro.id = champ.id;
+                    appState.podium.oro.name = cleanPlayerName(champ.name);
+
+                    appState.podium.plata.id = sub.id;
+                    appState.podium.plata.name = cleanPlayerName(sub.name);
+                }
+            }
+
+            updateDiplomaButtonsUI();
+        }
+
+        function updateDiplomaButtonsUI() {
+            const btnOro = document.getElementById('btn-podium-oro');
+            const btnPlata = document.getElementById('btn-podium-plata');
+            const btnB1 = document.getElementById('btn-podium-bronce1');
+            const btnB2 = document.getElementById('btn-podium-bronce2');
+
+            if (btnOro) btnOro.textContent = `🥇 1.° Lugar${appState.podium.oro.name ? `: ${appState.podium.oro.name}` : ''}`;
+            if (btnPlata) btnPlata.textContent = `🥈 2.° Lugar${appState.podium.plata.name ? `: ${appState.podium.plata.name}` : ''}`;
+            if (btnB1) btnB1.textContent = `🥉 3.° Semifinal 1${appState.podium.bronce1.name ? `: ${appState.podium.bronce1.name}` : ''}`;
+            if (btnB2) btnB2.textContent = `🥉 3.° Semifinal 2${appState.podium.bronce2.name ? `: ${appState.podium.bronce2.name}` : ''}`;
+        }
+
+        /* DIPLOMAS */
+        function selectPodiumDiploma(podiumType) {
+            appState.currentPodium = podiumType;
+            loadDiplomaForm();
+            renderDiplomaLive();
+        }
+
+        function loadDiplomaForm() {
+            if (!appState.podium) return;
+            const current = appState.podium[appState.currentPodium] || { name: '', title: 'CAMPEÓN INDIVIDUAL' };
+            document.getElementById('cert-champion').value = current.name || '';
+            document.getElementById('cert-title').value = current.title || '';
+            document.getElementById('cert-tournament').value = appState.diplomaMeta.tournament || '';
+            document.getElementById('cert-club').value = appState.diplomaMeta.club || '';
+            document.getElementById('cert-city').value = appState.diplomaMeta.city || '';
+            document.getElementById('cert-date').value = appState.diplomaMeta.date || '';
+            document.getElementById('cert-signer').value = appState.diplomaMeta.signer || '';
+
+            updateDiplomaButtonsUI();
+
+            if (appState.diplomaMeta.logoData) {
+                const logo = document.getElementById('view-logo');
+                logo.src = appState.diplomaMeta.logoData;
+                logo.style.display = 'block';
+            }
+        }
+
+        function updateDiplomaTexts() {
+            const current = appState.podium[appState.currentPodium];
+            current.name = document.getElementById('cert-champion').value;
+            current.title = document.getElementById('cert-title').value;
+
+            appState.diplomaMeta.tournament = document.getElementById('cert-tournament').value;
+            appState.diplomaMeta.club = document.getElementById('cert-club').value;
+            appState.diplomaMeta.city = document.getElementById('cert-city').value;
+            appState.diplomaMeta.date = document.getElementById('cert-date').value;
+            appState.diplomaMeta.signer = document.getElementById('cert-signer').value;
+
+            saveData();
+            renderDiplomaLive();
+            updateDiplomaButtonsUI();
+        }
+
+        function renderDiplomaLive() {
+            const current = appState.podium[appState.currentPodium] || { name: '', title: 'CAMPEÓN INDIVIDUAL' };
+            const wrapper = document.getElementById('diploma-to-print');
+            
+            const isPlata = appState.currentPodium === 'plata';
+            const isBronce = appState.currentPodium === 'bronce1' || appState.currentPodium === 'bronce2';
+            wrapper.className = 'diploma-wrapper ' + (isPlata ? 'plata' : (isBronce ? 'bronce' : ''));
+
+            document.getElementById('view-champion').textContent = current.name || 'NOMBRE DEL HOMENAJEADO';
+            document.getElementById('view-title').textContent = current.title || 'CAMPEÓN INDIVIDUAL';
+            document.getElementById('view-tournament').textContent = appState.diplomaMeta.tournament || 'Torneo Abierto de Billar a 3 Bandas';
+            document.getElementById('view-club').textContent = appState.diplomaMeta.club || 'Club de Billares';
+            document.getElementById('view-city').textContent = appState.diplomaMeta.city || 'El Vigía, Mérida';
+            document.getElementById('view-date').textContent = appState.diplomaMeta.date || 'Septiembre de 2026';
+            document.getElementById('view-signer').textContent = appState.diplomaMeta.signer || 'Comité Organizador';
+        }
+
+        function loadLogoImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64 = e.target.result;
+                const logo = document.getElementById('view-logo');
+                logo.src = base64;
+                logo.style.display = 'block';
+                appState.diplomaMeta.logoData = base64;
+                saveData();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        /* RANKING HISTÓRICO CORREGIDO POR ID */
+        function closeAndRecordTournament() {
+            const ranking = getGeneralRanking();
+            if (ranking.length === 0) {
+                alert("No hay partidas registradas en el torneo actual.");
+                return;
+            }
+
+            detectPodiumFromBracket();
+
+            const champId = appState.podium.oro.id;
+            const subId = appState.podium.plata.id;
+            const b1Id = appState.podium.bronce1.id;
+            const b2Id = appState.podium.bronce2.id;
+
+            const champName = appState.podium.oro.name;
+            const b1Name = appState.podium.bronce1.name;
+            const b2Name = appState.podium.bronce2.name;
+
+            if (!champId && !champName) {
+                if (!confirm("Aún no has registrado al Campeón de la Gran Final. ¿Deseas cerrar el torneo y acumular de todos modos?")) {
+                    return;
+                }
+            }
+
+            let msgConfirm = "¿Cerrar este torneo y acumular todos los puntos al Ranking Histórico?\n";
+            if (b1Name || b2Name) {
+                msgConfirm += `\n* 3.er Lugar detectado: ${b1Name || 'Pendiente'} y ${b2Name || 'Pendiente'}`;
+            }
+            if (!confirm(msgConfirm)) return;
+
+            ranking.forEach(p => {
+                const cleanName = cleanPlayerName(p.name);
+                if (!appState.historicalRanking[cleanName]) {
+                    appState.historicalRanking[cleanName] = {
+                        points: 0,
+                        tournaments: 0,
+                        first: 0,
+                        second: 0,
+                        third: 0,
+                        pj: 0,
+                        pg: 0,
+                        car: 0,
+                        inn: 0,
+                        hs: 0
+                    };
+                }
+
+                const hist = appState.historicalRanking[cleanName];
+                hist.tournaments += 1;
+                hist.pj += p.pj;
+                hist.pg += p.pg;
+                hist.car += p.car;
+                hist.inn += p.inn;
+                if (p.hs > hist.hs) hist.hs = p.hs;
+
+                let pts = 5;
+                pts += (p.pg * 3);
+
+                const isChamp = (champId && p.id === champId) || (champName && cleanName.toLowerCase() === champName.toLowerCase());
+                const isSub = (subId && p.id === subId) || (appState.podium.plata.name && cleanName.toLowerCase() === appState.podium.plata.name.toLowerCase());
+                const isBronce = (b1Id && p.id === b1Id) || (b2Id && p.id === b2Id) ||
+                                 (b1Name && cleanName.toLowerCase() === b1Name.toLowerCase()) ||
+                                 (b2Name && cleanName.toLowerCase() === b2Name.toLowerCase());
+
+                if (isChamp) {
+                    pts += 100;
+                    hist.first += 1;
+                } else if (isSub) {
+                    pts += 70;
+                    hist.second += 1;
+                } else if (isBronce) {
+                    pts += 50;
+                    hist.third += 1;
+                }
+
+                hist.points += pts;
+            });
+
+            saveData();
+            renderHistoricalRanking();
+            alert("¡Torneo cerrado con éxito! Las estadísticas, victorias y las dos medallas de bronce fueron sumadas al Ranking Histórico.");
+            switchTab('tab-historico');
+        }
+
+        function getSortedHistoricalList() {
+            let list = [];
+            for (let name in appState.historicalRanking) {
+                const h = appState.historicalRanking[name];
+                const prom = h.inn > 0 ? (h.car / h.inn) : 0;
+                list.push({
+                    name,
+                    points: h.points,
+                    tournaments: h.tournaments,
+                    first: h.first,
+                    second: h.second,
+                    third: h.third,
+                    pj: h.pj,
+                    pg: h.pg,
+                    car: h.car,
+                    inn: h.inn,
+                    hs: h.hs,
+                    prom: prom
+                });
+            }
+
+            list.sort((a, b) => {
+                if (b.points !== a.points) return b.points - a.points;
+                if (b.prom !== a.prom) return b.prom - a.prom;
+                if (b.first !== a.first) return b.first - a.first;
+                return b.pg - a.pg;
+            });
+
+            return list;
+        }
+
+        function renderHistoricalRanking() {
+            const tbody = document.getElementById('historical-ranking-body');
+            tbody.innerHTML = '';
+
+            const list = getSortedHistoricalList();
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="13" class="text-center" style="color:var(--text-muted); padding:2rem;">Aún no se ha cerrado ningún torneo para el histórico.</td></tr>`;
+                return;
+            }
+
+            list.forEach((p, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="text-center font-bold">${idx + 1}</td>
+                    <td><strong>${p.name}</strong></td>
+                    <td class="text-center font-bold" style="color:#facc15; font-size:1rem;">${p.points}</td>
+                    <td class="text-center">${p.tournaments}</td>
+                    <td class="text-center">${p.first > 0 ? `🥇 ${p.first}` : '-'}</td>
+                    <td class="text-center">${p.second > 0 ? `🥈 ${p.second}` : '-'}</td>
+                    <td class="text-center">${p.third > 0 ? `🥉 ${p.third}` : '-'}</td>
+                    <td class="text-center">${p.pj}</td>
+                    <td class="text-center">${p.pg}</td>
+                    <td class="text-center font-bold" style="color:#facc15;">${p.car}</td>
+                    <td class="text-center font-bold" style="color:#38bdf8;">${p.inn}</td>
+                    <td class="text-center font-bold" style="color:#22c55e;">${p.prom.toFixed(3)}</td>
+                    <td class="text-center">${p.hs}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function resetHistoricalRanking() {
+            if (confirm("¿Estás seguro de que deseas ELIMINAR todo el Ranking Histórico acumulado? Esta acción no se puede deshacer a menos que tengas un respaldo .JSON guardado.")) {
+                appState.historicalRanking = {};
+                saveData();
+                renderHistoricalRanking();
+                alert("Ranking Histórico eliminado.");
+            }
+        }
+    </script>
+</body>
+</html>
